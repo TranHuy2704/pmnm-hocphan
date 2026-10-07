@@ -279,3 +279,21 @@ def api_student_course_score(mssv, course):
             abort(404, description=f"Học phần {c_code} chưa có điểm để xoá.")
         del std["scores"][c_code]
         return "", 204
+
+ERROR_TITLES = {
+    400: "Dữ liệu không hợp lệ",
+    404: "Không tìm thấy",
+    405: "Phương thức không được hỗ trợ"
+}
+
+@app.errorhandler(400)
+@app.errorhandler(404)
+@app.errorhandler(405)
+def handle_error(error):
+    code = getattr(error, 'code', 500)
+    title = ERROR_TITLES.get(code, "Lỗi")
+    desc = getattr(error, 'description', str(error))
+    
+    if request.path.startswith("/api/"):
+        return jsonify({"error": title, "detail": desc}), code
+    return layout(title, f"<h2>{code} - {escape(title)}</h2><p>{escape(desc)}</p>"), cod
